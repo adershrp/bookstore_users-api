@@ -8,17 +8,29 @@ type RestError struct {
 	Error   string `json:"errors"`
 }
 
+// Bad request error
 func NewBadRequestError(message string) *RestError {
 	return &RestError{
 		Message: message,
 		Status:  http.StatusBadRequest,
-		Error:   "invalid_json_body",
+		Error:   http.StatusText(http.StatusBadRequest),
 	}
 }
+
+// Not found error
 func NewNotFoundError(message string) *RestError {
 	return &RestError{
 		Message: message,
 		Status:  http.StatusBadRequest,
-		Error:   "invalid_json_body",
+		Error:   http.StatusText(http.StatusBadRequest),
+	}
+}
+
+// Internal Server Error
+func NewInternalServerError(message string) *RestError {
+	return &RestError{
+		Message: message,
+		Status:  http.StatusInternalServerError,
+		Error:   http.StatusText(http.StatusInternalServerError),
 	}
 }
