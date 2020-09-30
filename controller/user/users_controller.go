@@ -1,15 +1,13 @@
 package user
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/adershrp/bookstore_users-api/domain/user"
 	"github.com/adershrp/bookstore_users-api/service"
+	"github.com/adershrp/bookstore_users-api/utils/errors"
 )
 
 // create user
@@ -18,23 +16,15 @@ All handlers should have *gin.Context as parameter
 */
 func CreateUser(c *gin.Context) {
 	var user user.User
-	fmt.Println("Before Parsing", user)
-	bytes, err := ioutil.ReadAll(c.Request.Body)
-	fmt.Println("Bytes", bytes)
-	if err != nil {
-		fmt.Println(err.Error())
-		// TODO handle error
-		return
-	}
-	if err := json.Unmarshal(bytes, &user); err != nil {
-		fmt.Println(err.Error())
-		// TODO handle json parsing error
+	// there are similar methods for XML, YAML
+	if err := c.ShouldBindJSON(&user); err != nil {
+		restErr := errors.NewBadRequestError("Invalid Json Body")
+		c.JSON(restErr.Status, restErr)
 		return
 	}
 	createUser, err := service.CreateUser(user)
 	if err != nil {
-		fmt.Println(err.Error())
-		// TODO handle service error
+		c.JSON(err.Status, err)
 		return
 	}
 	c.JSON(http.StatusCreated, createUser)

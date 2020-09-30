@@ -4,9 +4,10 @@ import (
 	"log"
 
 	"github.com/adershrp/bookstore_users-api/domain/user"
+	"github.com/adershrp/bookstore_users-api/utils/errors"
 )
 
-func CreateUser(user user.User) (*user.User, error) {
+func CreateUser(user user.User) (*user.User, *errors.RestError) {
 	log.Println("Created User", user)
 	return &user, nil
 }
