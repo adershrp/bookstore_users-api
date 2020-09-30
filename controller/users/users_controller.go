@@ -1,4 +1,4 @@
-package user
+package users
 
 import (
 	"net/http"
@@ -6,17 +6,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/adershrp/bookstore_users-api/domain/user"
+	"github.com/adershrp/bookstore_users-api/domain/users"
 	"github.com/adershrp/bookstore_users-api/service"
 	"github.com/adershrp/bookstore_users-api/utils/errors"
 )
 
-// create user
+// create users
 /**
 All handlers should have *gin.Context as parameter
 */
 func CreateUser(c *gin.Context) {
-	var nUser user.User
+	var nUser users.User
 	// there are similar methods for XML, YAML
 	if err := c.ShouldBindJSON(&nUser); err != nil {
 		restErr := errors.NewBadRequestError("Invalid Json Body")
@@ -31,7 +31,7 @@ func CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, createUser)
 }
 
-// get user
+// get users
 func GetUser(c *gin.Context) {
 	userId, err := strconv.ParseInt(c.Param("user_id"), 10, 64)
 	if err != nil {
@@ -47,7 +47,7 @@ func GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, eUser)
 }
 
-// search user
+// search users
 func SearchUser(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"message": "not implemented"})
 }
