@@ -15,3 +15,10 @@ func NewBadRequestError(message string) *RestError {
 		Error:   "invalid_json_body",
 	}
 }
+func NewNotFoundError(message string) *RestError {
+	return &RestError{
+		Message: message,
+		Status:  http.StatusBadRequest,
+		Error:   "invalid_json_body",
+	}
+}

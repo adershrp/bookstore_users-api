@@ -2,6 +2,7 @@ package user
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -15,14 +16,14 @@ import (
 All handlers should have *gin.Context as parameter
 */
 func CreateUser(c *gin.Context) {
-	var user user.User
+	var nUser user.User
 	// there are similar methods for XML, YAML
-	if err := c.ShouldBindJSON(&user); err != nil {
+	if err := c.ShouldBindJSON(&nUser); err != nil {
 		restErr := errors.NewBadRequestError("Invalid Json Body")
 		c.JSON(restErr.Status, restErr)
 		return
 	}
-	createUser, err := service.CreateUser(user)
+	createUser, err := service.CreateUser(nUser)
 	if err != nil {
 		c.JSON(err.Status, err)
 		return
@@ -32,7 +33,18 @@ func CreateUser(c *gin.Context) {
 
 // get user
 func GetUser(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{"message": "not implemented"})
+	userId, err := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if err != nil {
+		restErr := errors.NewBadRequestError("couldn't parse the parameter user_id to number")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+	eUser, getErr := service.GetUser(userId)
+	if getErr != nil {
+		c.JSON(getErr.Status, getErr)
+		return
+	}
+	c.JSON(http.StatusOK, eUser)
 }
 
 // search user
