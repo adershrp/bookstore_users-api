@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/adershrp/bookstore_users-api/domain/users"
+	"github.com/adershrp/bookstore_users-api/utils/crypto_utils"
 	"github.com/adershrp/bookstore_users-api/utils/dates"
 	"github.com/adershrp/bookstore_users-api/utils/errors"
 )
@@ -16,6 +17,7 @@ func CreateUser(user users.User) (*users.User, *errors.RestError) {
 	// assigning current system date
 	user.DateCreated = dates.GetNowDBFormat()
 	user.Status = users.StatusActive
+	user.Password = crypto_utils.GetMD5(user.Password)
 	if err := user.Save(); err != nil {
 		return nil, err
 	}
@@ -85,7 +87,7 @@ func DeleteUser(userId int64) *errors.RestError {
 Find by the status
 create a DAO, and call the method.
 */
-func Search(status string) ([]users.User, *errors.RestError) {
+func Search(status string) (users.Users, *errors.RestError) {
 	dao := &users.User{}
 	return dao.FindUserByStatus(status)
 }
