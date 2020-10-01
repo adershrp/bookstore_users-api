@@ -13,5 +13,21 @@ func mapUrls() {
 	*/
 	router.GET("/users/:user_id", users.GetUser)
 	// router.GET("/users/search", controller.SearchUser)
+
+	/**
+	POST - create, not Idempotent, Create multiple record for each operation
+	Adding resource under the collection, here add a new user under users collection.
+	*/
 	router.POST("/users", users.CreateUser)
+
+	/**
+	PUT - for UPDATE, Idempotent, PUT replaces the operation entirely
+	If the requested URI already exists, will update it. Else create one.
+	Idempotent. Same operation will only update (entire record).
+	*/
+	router.PUT("/users/:user_id", users.UpdateUser)
+	/**
+	PATCH - for partial update, Idempotent, update selected fields
+	*/
+	router.PATCH("/users/:user_id", users.UpdateUser)
 }
