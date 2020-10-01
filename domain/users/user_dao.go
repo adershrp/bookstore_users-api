@@ -1,17 +1,18 @@
 package users
 
 import (
+	"fmt"
 	"github.com/adershrp/bookstore_users-api/datasources/mysql/users_db"
-	"github.com/adershrp/bookstore_users-api/utils/dates"
 	"github.com/adershrp/bookstore_users-api/utils/errors"
 	"github.com/adershrp/bookstore_users-api/utils/mysql_utils"
 )
 
 const (
-	queryInsertUser  = "INSERT INTO users (first_name, last_name, email, date_created) VALUES (?, ?, ?, ?);"
-	queryGetUserById = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
-	queryUpdateUser  = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
-	queryDeleteUser  = "DELETE FROM users WHERE id=?;"
+	queryInsertUser   = "INSERT INTO users (first_name, last_name, email, date_created, status, password) VALUES (?, ?, ?, ?, ?, ?);"
+	queryGetUserById  = "SELECT id, first_name, last_name, email, date_created, status FROM users WHERE id=?;"
+	queryUpdateUser   = "UPDATE users SET first_name=?, last_name=?, email=?, status=? WHERE id=?;"
+	queryDeleteUser   = "DELETE FROM users WHERE id=?;"
+	queryFindByStatus = "SELECT id, first_name, last_name, email, date_created, status FROM users WHERE status=?;"
 )
 
 /**
@@ -29,7 +30,7 @@ func (user *User) Get() *errors.RestError {
 	  stmt.QueryRow returns single row of record hence no need to close the result
 	*/
 	row := stmt.QueryRow(user.Id)
-	if err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); err != nil {
+	if err := row.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); err != nil {
 		return mysql_utils.ParseError(err)
 	}
 	return nil
@@ -49,9 +50,7 @@ func (user *User) Save() *errors.RestError {
 	}
 	defer stmt.Close() // closing the statement. this wil execute before return
 
-	// assigning current system date
-	user.DateCreated = dates.GetNowString()
-	result, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated)
+	result, err := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated, user.Status, user.Password)
 	/**
 	  Instead of using Prepare Statement, we could achieve the same result using below code.
 	  result, err = users_db.Client.Exec(queryInsertUser, user.FirstName, user.LastName, user.Email, user.DateCreated)
@@ -79,7 +78,7 @@ func (user *User) Update() *errors.RestError {
 	}
 	defer stmt.Close()
 
-	if _, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Id); err != nil {
+	if _, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Status, user.Id); err != nil {
 		return mysql_utils.ParseError(err)
 	}
 	return nil
@@ -99,4 +98,32 @@ func (user *User) Delete() *errors.RestError {
 		return mysql_utils.ParseError(err)
 	}
 	return nil
+}
+
+func (user *User) FindUserByStatus(status string) ([]User, *errors.RestError) {
+	stmt, err := users_db.Client.Prepare(queryFindByStatus)
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(status)
+	if err != nil {
+		return nil, mysql_utils.ParseError(err)
+	}
+	defer rows.Close()
+
+	var result = make([]User, 0)
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); err != nil {
+			return nil, mysql_utils.ParseError(err)
+		}
+		result = append(result, user)
+	}
+
+	if len(result) == 0 {
+		return nil, errors.NewNotFoundError(fmt.Sprintf("No data found for status %s", status))
+	}
+	return result, nil
 }

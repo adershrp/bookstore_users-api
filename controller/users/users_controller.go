@@ -45,6 +45,7 @@ func Get(c *gin.Context) {
 	userId, restErr := getUserId(c.Param("user_id"))
 	if restErr != nil {
 		c.JSON(restErr.Status, restErr)
+		return
 	}
 	user, getErr := service.GetUser(userId)
 	if getErr != nil {
@@ -54,11 +55,6 @@ func Get(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// search users
-func SearchUser(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{"message": "not implemented"})
-}
-
 func Update(c *gin.Context) {
 	/**
 	From path variable extract the userid
@@ -66,6 +62,7 @@ func Update(c *gin.Context) {
 	userId, restErr := getUserId(c.Param("user_id"))
 	if restErr != nil {
 		c.JSON(restErr.Status, restErr)
+		return
 	}
 	/**
 	Validate the request body
@@ -100,4 +97,14 @@ func Delete(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
+}
+
+func Search(c *gin.Context) {
+	status := c.Query("status")
+	results, restErr := service.Search(status)
+	if restErr != nil {
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+	c.JSON(http.StatusOK, results)
 }
