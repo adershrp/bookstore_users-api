@@ -5,6 +5,9 @@ import (
 	"github.com/adershrp/bookstore_users-api/utils/errors"
 )
 
+/**
+Create a new user record
+*/
 func CreateUser(user users.User) (*users.User, *errors.RestError) {
 	if err := user.Validate(); err != nil {
 		return nil, err
@@ -14,6 +17,10 @@ func CreateUser(user users.User) (*users.User, *errors.RestError) {
 	}
 	return &user, nil
 }
+
+/**
+Fetch user by Id.
+*/
 func GetUser(userId int64) (*users.User, *errors.RestError) {
 	user := &users.User{Id: userId}
 	if err := user.Get(); err != nil {
@@ -22,6 +29,9 @@ func GetUser(userId int64) (*users.User, *errors.RestError) {
 	return user, nil
 }
 
+/**
+Update User, both partial and full update of the payload
+*/
 func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestError) {
 	/**
 	Get the user details based on the path variable passed.
@@ -54,4 +64,12 @@ func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestError
 		return nil, err
 	}
 	return current, nil
+}
+
+/**
+Delete User by passing userId
+*/
+func DeleteUser(userId int64) *errors.RestError {
+	user := &users.User{Id: userId}
+	return user.Delete()
 }

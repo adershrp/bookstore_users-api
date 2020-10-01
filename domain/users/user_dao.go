@@ -11,6 +11,7 @@ const (
 	queryInsertUser  = "INSERT INTO users (first_name, last_name, email, date_created) VALUES (?, ?, ?, ?);"
 	queryGetUserById = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
 	queryUpdateUser  = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
+	queryDeleteUser  = "DELETE FROM users WHERE id=?;"
 )
 
 /**
@@ -34,6 +35,9 @@ func (user *User) Get() *errors.RestError {
 	return nil
 }
 
+/**
+Create User
+*/
 func (user *User) Save() *errors.RestError {
 	/**
 	  Prepare Statement - has lot of advantage compare to statements.
@@ -65,6 +69,9 @@ func (user *User) Save() *errors.RestError {
 	return nil
 }
 
+/**
+Update User
+*/
 func (user *User) Update() *errors.RestError {
 	stmt, err := users_db.Client.Prepare(queryUpdateUser)
 	if err != nil {
@@ -72,8 +79,23 @@ func (user *User) Update() *errors.RestError {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Id)
+	if _, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.Id); err != nil {
+		return mysql_utils.ParseError(err)
+	}
+	return nil
+}
+
+/**
+Delete User by userId
+*/
+func (user *User) Delete() *errors.RestError {
+	stmt, err := users_db.Client.Prepare(queryDeleteUser)
 	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer stmt.Close()
+
+	if _, err = stmt.Exec(user.Id); err != nil {
 		return mysql_utils.ParseError(err)
 	}
 	return nil

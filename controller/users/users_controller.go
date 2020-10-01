@@ -11,11 +11,20 @@ import (
 	"github.com/adershrp/bookstore_users-api/utils/errors"
 )
 
+func getUserId(userIdParam string) (int64, *errors.RestError) {
+	userId, err := strconv.ParseInt(userIdParam, 10, 64)
+	if err != nil {
+		restErr := errors.NewBadRequestError("couldn't parse the parameter user_id to number")
+		return 0, restErr
+	}
+	return userId, nil
+}
+
 // create users
 /**
 All handlers should have *gin.Context as parameter
 */
-func CreateUser(c *gin.Context) {
+func Create(c *gin.Context) {
 	var user users.User
 	// there are similar methods for XML, YAML
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -32,12 +41,10 @@ func CreateUser(c *gin.Context) {
 }
 
 // get users
-func GetUser(c *gin.Context) {
-	userId, err := strconv.ParseInt(c.Param("user_id"), 10, 64)
-	if err != nil {
-		restErr := errors.NewBadRequestError("couldn't parse the parameter user_id to number")
+func Get(c *gin.Context) {
+	userId, restErr := getUserId(c.Param("user_id"))
+	if restErr != nil {
 		c.JSON(restErr.Status, restErr)
-		return
 	}
 	user, getErr := service.GetUser(userId)
 	if getErr != nil {
@@ -52,15 +59,13 @@ func SearchUser(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"message": "not implemented"})
 }
 
-func UpdateUser(c *gin.Context) {
+func Update(c *gin.Context) {
 	/**
 	From path variable extract the userid
 	*/
-	userId, err := strconv.ParseInt(c.Param("user_id"), 10, 64)
-	if err != nil {
-		restErr := errors.NewBadRequestError("couldn't parse the parameter user_id to number")
+	userId, restErr := getUserId(c.Param("user_id"))
+	if restErr != nil {
 		c.JSON(restErr.Status, restErr)
-		return
 	}
 	/**
 	Validate the request body
@@ -82,4 +87,17 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, updateUser)
+}
+
+func Delete(c *gin.Context) {
+	userId, restErr := getUserId(c.Param("user_id"))
+	if restErr != nil {
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+	if restErr := service.DeleteUser(userId); restErr != nil {
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
 }
