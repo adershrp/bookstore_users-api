@@ -3,6 +3,7 @@ package users
 import (
 	"fmt"
 	"github.com/adershrp/bookstore_users-api/datasources/mysql/users_db"
+	"github.com/adershrp/bookstore_users-api/logger"
 	"github.com/adershrp/bookstore_users-api/utils/errors"
 	"github.com/adershrp/bookstore_users-api/utils/mysql_utils"
 )
@@ -23,6 +24,7 @@ all other queries based on other attributes should be called as search
 func (user *User) Get() *errors.RestError {
 	stmt, err := users_db.Client.Prepare(queryGetUserById)
 	if err != nil {
+		logger.Error("Bad statement preparation", err)
 		return errors.NewInternalServerError(err.Error())
 	}
 	defer stmt.Close() // closing the statement. this wil execute before return
@@ -46,6 +48,7 @@ func (user *User) Save() *errors.RestError {
 	*/
 	stmt, err := users_db.Client.Prepare(queryInsertUser)
 	if err != nil {
+		logger.Error("Bad statement preparation", err)
 		return errors.NewInternalServerError(err.Error())
 	}
 	defer stmt.Close() // closing the statement. this wil execute before return
@@ -74,6 +77,7 @@ Update User
 func (user *User) Update() *errors.RestError {
 	stmt, err := users_db.Client.Prepare(queryUpdateUser)
 	if err != nil {
+		logger.Error("Bad statement preparation", err)
 		return errors.NewInternalServerError(err.Error())
 	}
 	defer stmt.Close()
@@ -90,6 +94,7 @@ Delete User by userId
 func (user *User) Delete() *errors.RestError {
 	stmt, err := users_db.Client.Prepare(queryDeleteUser)
 	if err != nil {
+		logger.Error("Bad statement preparation", err)
 		return errors.NewInternalServerError(err.Error())
 	}
 	defer stmt.Close()
@@ -103,6 +108,7 @@ func (user *User) Delete() *errors.RestError {
 func (user *User) FindUserByStatus(status string) ([]User, *errors.RestError) {
 	stmt, err := users_db.Client.Prepare(queryFindByStatus)
 	if err != nil {
+		logger.Error("Bad statement preparation", err)
 		return nil, errors.NewInternalServerError(err.Error())
 	}
 	defer stmt.Close()
@@ -121,7 +127,6 @@ func (user *User) FindUserByStatus(status string) ([]User, *errors.RestError) {
 		}
 		result = append(result, user)
 	}
-
 	if len(result) == 0 {
 		return nil, errors.NewNotFoundError(fmt.Sprintf("No data found for status %s", status))
 	}

@@ -8,9 +8,27 @@ import (
 )
 
 /**
+Variable of UserService Type userServiceInterface and having an instance of userService
+*/
+var UserService userServiceInterface = &userService{}
+
+type userService struct{}
+
+/**
+Interface
+*/
+type userServiceInterface interface {
+	CreateUser(users.User) (*users.User, *errors.RestError)
+	GetUser(int64) (*users.User, *errors.RestError)
+	UpdateUser(bool, users.User) (*users.User, *errors.RestError)
+	DeleteUser(int64) *errors.RestError
+	SearchUser(string) (users.Users, *errors.RestError)
+}
+
+/**
 Create a new user record
 */
-func CreateUser(user users.User) (*users.User, *errors.RestError) {
+func (s *userService) CreateUser(user users.User) (*users.User, *errors.RestError) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
@@ -27,7 +45,7 @@ func CreateUser(user users.User) (*users.User, *errors.RestError) {
 /**
 Fetch user by Id.
 */
-func GetUser(userId int64) (*users.User, *errors.RestError) {
+func (s *userService) GetUser(userId int64) (*users.User, *errors.RestError) {
 	user := &users.User{Id: userId}
 	if err := user.Get(); err != nil {
 		return nil, err
@@ -38,11 +56,11 @@ func GetUser(userId int64) (*users.User, *errors.RestError) {
 /**
 Update User, both partial and full update of the payload
 */
-func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestError) {
+func (s *userService) UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestError) {
 	/**
 	Get the user details based on the path variable passed.
 	*/
-	current, err := GetUser(user.Id)
+	current, err := s.GetUser(user.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +96,7 @@ func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestError
 /**
 Delete User by passing userId
 */
-func DeleteUser(userId int64) *errors.RestError {
+func (s *userService) DeleteUser(userId int64) *errors.RestError {
 	user := &users.User{Id: userId}
 	return user.Delete()
 }
@@ -87,7 +105,7 @@ func DeleteUser(userId int64) *errors.RestError {
 Find by the status
 create a DAO, and call the method.
 */
-func Search(status string) (users.Users, *errors.RestError) {
+func (s *userService) SearchUser(status string) (users.Users, *errors.RestError) {
 	dao := &users.User{}
 	return dao.FindUserByStatus(status)
 }

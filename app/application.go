@@ -1,6 +1,9 @@
 package app
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/adershrp/bookstore_users-api/logger"
+	"github.com/gin-gonic/gin"
+)
 
 /**
 Defining the router.
@@ -11,5 +14,6 @@ var router = gin.Default()
 func StartApplication() {
 	// url-handler mapping
 	mapUrls()
+	logger.Info("Server started on port 9090")
 	router.Run(":9090")
 }

@@ -3,7 +3,7 @@ package users_db
 import (
 	"database/sql"
 	"fmt"
-	"log"
+	"github.com/adershrp/bookstore_users-api/logger"
 	"os"
 	/**
 	  Just loading the driver.
@@ -37,6 +37,7 @@ func init() {
 	var err error
 	Client, err = sql.Open("mysql", dataSourceName)
 	if err != nil {
+		logger.Error("Error while connecting to Database.", err)
 		panic(err)
 	}
 	/**
@@ -44,7 +45,8 @@ func init() {
 	*/
 	err = Client.Ping()
 	if err != nil {
+		logger.Error("Error while connecting to Database.", err)
 		panic(err)
 	}
-	log.Println("Database successfully connected.")
+	logger.Info("Database successfully connected.")
 }
